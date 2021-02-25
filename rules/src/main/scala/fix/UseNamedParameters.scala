@@ -65,6 +65,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
         // it to figure out which param block we're currently handling
         fname
       case Term.ApplyType(fname, _) => fname
+      case s: Term.Select => s.name
     }
 
   private def mkPatchGenForArgList(

@@ -10,6 +10,7 @@ case class TParam[A](x1: A, x2: A)
 case class TCurry[A](x1: A, x2: A)(y1: A, y2: A)
 class Overload(first: Int, `second)`: Long) {
   def this(another: Int, int: Int) = this(another, int.toLong)
+  def method(first: Int, second: Int): Unit = ()
 }
 
 object UseNamedParametersConfig {
@@ -22,6 +23,7 @@ object UseNamedParametersConfig {
 
   Case(1, "s")
   new Case(2, "s")
+  Case.apply(3, "z")
   new Curry(1, "s")(5, 6.0, 7L)
 
   func(3, "s")
@@ -33,7 +35,7 @@ object UseNamedParametersConfig {
   overloaded(1, 2, "3")
 
   new Overload(1, 2L)
-  new Overload(1, 2)
+  new Overload(1, 2).method(1, 2)
 
   TParam[Int](1, 2)
   new TParam[Int](3, 4)

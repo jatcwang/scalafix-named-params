@@ -19,7 +19,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
     doc.tree
       .collect {
         case Init(_, name, argss) =>
-          resolveMethodSignatureFromSymbol(name.symbol) match {
+          resolveScalaMethodSignatureFromSymbol(name.symbol) match {
             case Some(methodSig) =>
               val patchGens: List[(Term, Int) => Patch] =
                 methodSig.parameterLists.zipWithIndex.map { case (_, idx) => mkPatchGenForArgList(methodSig, idx) }
@@ -38,7 +38,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
           if (shouldPatchArgumentBlock(args)) {
             val fname = resolveFunctionTerm(fun)
             val methodSignatureOpt =
-              resolveMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
+              resolveScalaMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
             methodSignatureOpt match {
               case Some(methodSig)
                   if methodSig.parameterLists.nonEmpty => // parameterLists.nonEmpty filters out FunctionX types
@@ -78,17 +78,27 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
         case _: Term.Assign => Patch.empty // Already using named param, no patch needed
         case t =>
           // Term.Name will escape any weird identifiers
-          val paramName = Term.Name(thisParamBlock(idx).displayName).toString
-          Patch.addLeft(t, s"$paramName = ")
+          thisParamBlock.lift(idx) match {
+            case Some(symInfo) =>
+              val paramName = Term.Name(symInfo.displayName).toString
+              Patch.addLeft(t, s"$paramName = ")
+            case None => // Var args
+              Patch.empty
+          }
       }
     }
   }
 
-  private def resolveMethodSignatureFromSymbol(
+  private def resolveScalaMethodSignatureFromSymbol(
     funcSymbol: Symbol
   )(implicit doc: SemanticDocument): Option[MethodSignature] =
-    funcSymbol.info.map(_.signature).collect {
-      case m: MethodSignature => m
+    funcSymbol.info.flatMap { symInfo =>
+      if (symInfo.isScala)
+        symInfo.signature match {
+          case m: MethodSignature => Some(m)
+          case _ => None
+        }
+      else None
     }
 
   // To resolve companion object .apply methods

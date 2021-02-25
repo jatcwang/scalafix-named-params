@@ -1,23 +1,22 @@
 lazy val V = _root_.scalafix.sbt.BuildInfo
 inThisBuild(
   List(
-    organization := "com.geirsson",
-    homepage := Some(url("https://github.com/olafurpg/named-literal-arguments")),
+    organization := "com.github.jatcwang",
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers := List(
       Developer(
-        "olafurpg",
-        "Olafur Geirssson",
-        "olafur@geirsson.com",
-        url("https://geirsson.com")
+        "jatcwang",
+        "Jacob Wang",
+        "jatcwang@gmail.com",
+        url("https://almostfunctional.com")
       )
     ),
     scalaVersion := V.scala212,
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= List(
       "-Yrangepos",
-      "-P:semanticdb:synthetics:on",
-    ),
+      "-P:semanticdb:synthetics:on"
+    )
     // classLoaderLayeringStrategy in Compile := ClassLoaderLayeringStrategy.Flat
   )
 )
@@ -25,7 +24,7 @@ inThisBuild(
 skip in publish := true
 
 lazy val rules = project.settings(
-  moduleName := "named-literal-arguments",
+  moduleName := "scalafix-named-params",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion
 )
 

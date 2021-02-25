@@ -8,6 +8,9 @@ class Overload(first: Int, `second)`: Long) {
   def this(another: Int, int: Int) = this(first = another, `second)` = int.toLong)
   def method(first: Int, second: Int): Unit = ()
 }
+case class VarArgs(a: String, i: Int*) {
+  def varArgs(b: String, i: Int*): Unit = ()
+}
 
 object UseNamedParametersConfig {
   def func(i: Int, s: String) = ()
@@ -38,4 +41,8 @@ object UseNamedParametersConfig {
 
   TCurry[Long](x1 = 1L, x2 = 2L)(3L, 4L)
   new TCurry[Long](x1 = 1L, x2 = 2L)(y1 = 3L, y2 = 4L)
+
+  VarArgs(a = "a", i = 1, 2, 3).varArgs(b = "b", i = 4, 5, 6)
+
+  new JavaClass(1, "s").method(2, "ss")
 }

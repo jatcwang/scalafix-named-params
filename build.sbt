@@ -25,6 +25,7 @@ skip in publish := true
 
 lazy val rules = project.settings(
   moduleName := "scalafix-named-params",
+  version := "0.1.0-LOCAL",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion
 )
 

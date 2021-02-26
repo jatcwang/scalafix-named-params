@@ -10,10 +10,19 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
     extends SemanticRule(classOf[UseNamedParameters].getSimpleName) {
   def this() = this(UseNamedParametersConfig.default)
 
-  override def withConfiguration(config: Configuration): Configured[Rule] =
-    config.conf
-      .getOrElse(this.getClass.getSimpleName)(this.config)
-      .map(newConfig => new UseNamedParameters(newConfig))
+  override def withConfiguration(config: Configuration): Configured[Rule] = {
+    val requiredScalacOption = "-P:semanticdb:synthetics:on"
+    if (config.scalacOptions.contains(requiredScalacOption)) {
+      config.conf
+        .getOrElse(this.getClass.getSimpleName)(this.config)
+        .map(newConfig => new UseNamedParameters(newConfig))
+    } else {
+      Configured.error(
+        s"""This rule requires SemanticDB synthetics to work properly (e.g. to detect case class apply).
+          |Please add "$requiredScalacOption" to scala compiler options (e.g. scalacOptions in SBT).""".stripMargin
+      )
+    }
+  }
 
   override def fix(implicit doc: SemanticDocument): Patch = {
     doc.tree
@@ -34,7 +43,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 }
             case None => List.empty
           }
-        case Term.Apply(fun, args) =>
+        case a @ Term.Apply(fun, args) => {
           if (shouldPatchArgumentBlock(args)) {
             val fname = resolveFunctionTerm(fun)
             val methodSignatureOpt =
@@ -49,6 +58,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
             }
           } else
             List.empty
+        }
       }
       .flatten
       .asPatch

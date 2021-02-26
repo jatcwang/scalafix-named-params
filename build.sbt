@@ -18,7 +18,6 @@ inThisBuild(
       "-Yrangepos",
       "-P:semanticdb:synthetics:on"
     )
-    // classLoaderLayeringStrategy in Compile := ClassLoaderLayeringStrategy.Flat
   )
 )
 
@@ -26,7 +25,6 @@ skip in publish := true
 
 lazy val rules = project.settings(
   moduleName := "scalafix-named-params",
-  version := "0.1.0-LOCAL",
   libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion
 )
 
@@ -51,3 +49,25 @@ lazy val tests = project
   )
   .dependsOn(rules)
   .enablePlugins(ScalafixTestkitPlugin)
+
+ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.11")
+ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+ThisBuild / githubWorkflowPublishTargetBranches :=
+  Seq(RefPredicate.StartsWith(Ref.Tag("v")))
+
+ThisBuild / githubWorkflowPublish := Seq(
+  WorkflowStep.Sbt(
+    List("ci-release"),
+    env = Map(
+      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )
+)
+
+// Filter out MacOS and Windows cache steps to make yaml less noisy
+ThisBuild / githubWorkflowGeneratedCacheSteps ~= { currentSteps =>
+  currentSteps.filterNot(wf => wf.cond.exists(str => str.contains("macos") || str.contains("windows")))
+}

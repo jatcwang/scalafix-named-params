@@ -28,7 +28,7 @@ myObj.someMethod(param1 = 4, param2 = 5, strParam =  "6")
 
 ## Usage
 
-Since this rule isn't published, you'll need to clone this repo:
+Since this rule isn't published at the moment, you'll need to clone this repo:
 
 ```
 git clone https://github.com/jatcwang/scalafix-named-params --depth=1
@@ -36,14 +36,16 @@ cd scalafix-named-params
 sbt publishLocal
 ```
 
-and then in your project's SBT console (make sure your project is using the scalafix plugin)
+Ensure your project has scalafix enabled and has the scalac option `-P:semanticdb:synthetics:on`.
+
+Run in SBT:
 
 ```
 scalafixEnable
 
 yourmodulename/scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:0.1.0-LOCAL
 
-# Run the rule in test files
+# Or run the rule in test files
 yourmodulename/test:scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:0.1.0-LOCAL
 ```
 

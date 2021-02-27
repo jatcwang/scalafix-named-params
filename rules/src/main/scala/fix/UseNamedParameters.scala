@@ -34,12 +34,11 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 methodSig.parameterLists.zipWithIndex.map { case (_, idx) => mkPatchGenForArgList(methodSig, idx) }
               argss
                 .zip(patchGens)
-                .flatMap {
-                  case (argsInBlock, patchGen) =>
-                    if (shouldPatchArgumentBlock(argsInBlock))
-                      argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
-                    else
-                      List.empty
+                .flatMap { case (argsInBlock, patchGen) =>
+                  if (shouldPatchArgumentBlock(argsInBlock))
+                    argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
+                  else
+                    List.empty
                 }
             case None => List.empty
           }
@@ -117,8 +116,8 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
       .flatMap(_.symbol)
       .flatMap(_.info)
       .map(_.signature)
-      .collectFirst {
-        case m: MethodSignature => m
+      .collectFirst { case m: MethodSignature =>
+        m
       }
   }
 

@@ -24,17 +24,7 @@ func(first = 1, second = 2, third = 3)
 myObj.someMethod(param1 = 4, param2 = 5, strParam =  "6")
 ```
 
-**Note**: this rule isn't published atm. I'm trying to find an umbrella project to make this more discoverable. Let me know :)
-
 ## Usage
-
-Since this rule isn't published at the moment, you'll need to clone this repo:
-
-```
-git clone https://github.com/jatcwang/scalafix-named-params --depth=1
-cd scalafix-named-params
-sbt publishLocal
-```
 
 Ensure your project has scalafix enabled and has the scalac option `-P:semanticdb:synthetics:on`.
 
@@ -43,11 +33,14 @@ Run in SBT:
 ```
 scalafixEnable
 
-yourmodulename/scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:0.1.0-LOCAL
+yourmodulename/scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:<LATEST_VERSION>
 
 # Or run the rule in test files
-yourmodulename/test:scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:0.1.0-LOCAL
+yourmodulename/test:scalafix dependency:UseNamedParameters@com.github.jatcwang:scalafix-named-params:<LATEST_VERSION>
 ```
+Replace `<LATEST_VERSION>` with the latest version of the rule.
+
+[![Release](https://img.shields.io/nexus/r/com.github.jatcwang/scalafix-named-params_2.12?server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/releases/com/github/jatcwang/scalafix-named-params_2.12/)
 
 ## Configuration
 

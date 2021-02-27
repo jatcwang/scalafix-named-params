@@ -4,6 +4,7 @@ inThisBuild(
   List(
     organization := "com.github.jatcwang",
     licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    homepage := Some(url("https://github.com/jatcwang/scalafix-named-params")),
     developers := List(
       Developer(
         "jatcwang",

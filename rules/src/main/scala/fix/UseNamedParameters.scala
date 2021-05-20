@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 import scala.meta._
 
 final class UseNamedParameters(config: UseNamedParametersConfig)
-    extends SemanticRule(classOf[UseNamedParameters].getSimpleName) {
+    extends SemanticRule(classOf[AbstractSemanticRuleSuite].getSimpleName) {
   def this() = this(UseNamedParametersConfig.default)
 
   override def withConfiguration(config: Configuration): Configured[Rule] = {

@@ -12,4 +12,5 @@ object UseNamedParameters {
   new Two(1, 2)
   new Three(i = 1, j = 2, k = 3)
   new Four(i = 1, j = 2, k = 3, l = 4)
+  val makeFour: (Int, Int) => Four = new Four(1, _, _, 4)
 }

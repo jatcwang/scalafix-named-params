@@ -1,3 +1,5 @@
+import sbtghactions.JavaSpec
+
 lazy val V = _root_.scalafix.sbt.BuildInfo
 
 inThisBuild(
@@ -22,7 +24,7 @@ inThisBuild(
   )
 )
 
-skip in publish := true
+publish / skip := true
 
 lazy val rules = project.settings(
   moduleName := "scalafix-named-params",
@@ -30,28 +32,28 @@ lazy val rules = project.settings(
 )
 
 lazy val input = project.settings(
-  skip in publish := true
+  publish / skip := true
 )
 
 lazy val output = project.settings(
-  skip in publish := true
+  publish / skip := true
 )
 
 lazy val tests = project
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % V.scalafixVersion % Test cross CrossVersion.full,
     scalafixTestkitOutputSourceDirectories :=
-      sourceDirectories.in(output, Compile).value,
+      (output / Compile / sourceDirectories).value,
     scalafixTestkitInputSourceDirectories :=
-      sourceDirectories.in(input, Compile).value,
+      (input / Compile / sourceDirectories).value,
     scalafixTestkitInputClasspath :=
-      fullClasspath.in(input, Compile).value
+      (input / Compile / fullClasspath).value
   )
   .dependsOn(rules)
   .enablePlugins(ScalafixTestkitPlugin)
 
-ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.11")
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches :=
   Seq(RefPredicate.StartsWith(Ref.Tag("v")))

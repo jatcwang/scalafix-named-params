@@ -27,7 +27,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   override def fix(implicit doc: SemanticDocument): Patch = {
     doc.tree
       .collect {
-        case Init(_, name, argss) =>
+        case Init(_, name, argss) if !hasPlaceholder(argss.flatten) =>
           resolveScalaMethodSignatureFromSymbol(name.symbol) match {
             case Some(methodSig) =>
               val patchGens: List[(Term, Int) => Patch] =
@@ -42,7 +42,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 }
             case None => List.empty
           }
-        case a @ Term.Apply(fun, args) => {
+        case Term.Apply(fun, args) if !hasPlaceholder(args) => {
           if (shouldPatchArgumentBlock(args)) {
             val fname = resolveFunctionTerm(fun)
             val methodSignatureOpt =
@@ -62,6 +62,9 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
       .flatten
       .asPatch
   }
+
+  private def hasPlaceholder(argTerms: List[Term]): Boolean =
+    argTerms.collect{ case Term.Placeholder() => true }.exists(x => x)
 
   private def shouldPatchArgumentBlock(argTerms: List[Term]): Boolean =
     argTerms.lengthCompare(config.minParams) != -1

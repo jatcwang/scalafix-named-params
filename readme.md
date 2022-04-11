@@ -40,7 +40,7 @@ yourmodulename/test:scalafix dependency:UseNamedParameters@com.github.jatcwang:s
 ```
 Replace `<LATEST_VERSION>` with the latest version of the rule.
 
-[![Release](https://img.shields.io/nexus/r/com.github.jatcwang/scalafix-named-params_2.12?server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/releases/com/github/jatcwang/scalafix-named-params_2.12/)
+[![Release](https://img.shields.io/nexus/r/com.github.jatcwang/scalafix-named-params_2.13?server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/releases/com/github/jatcwang/scalafix-named-params_2.12/)
 
 ## Configuration
 

@@ -16,6 +16,7 @@ inThisBuild(
       )
     ),
     scalaVersion := V.scala212,
+    crossScalaVersions := Seq(V.scala212, V.scala213),
     addCompilerPlugin(scalafixSemanticdb),
     scalacOptions ++= List(
       "-Yrangepos",

@@ -49,4 +49,6 @@ object UseNamedParametersConfig {
   VarArgs(a = "a", i = 1, 2, 3).varArgs("b", 4, 5, 6)
 
   new JavaClass(1, "s").method(2, "ss")
+  
+  List(1,2,3)
 }

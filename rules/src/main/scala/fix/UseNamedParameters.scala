@@ -31,19 +31,15 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
           resolveScalaMethodSignatureFromSymbol(name.symbol) match {
             case Some(methodSig) =>
               val patchGens: List[(Term, Int) => Patch] =
-                methodSig.parameterLists.zipWithIndex.map { case (_, idx) => mkPatchGenForArgList(methodSig, idx) }
+                methodSig.parameterLists.zipWithIndex.map { case (_, idx) => mkPatchGenForArgList(config, methodSig, idx) }
               argss
                 .zip(patchGens)
                 .flatMap { case (argsInBlock, patchGen) =>
-                  if (shouldPatchArgumentBlock(argsInBlock))
                     argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
-                  else
-                    List.empty
                 }
             case None => List.empty
           }
         case Term.Apply(fun, args) if !hasPlaceholder(args) => {
-          if (shouldPatchArgumentBlock(args)) {
             val fname = resolveFunctionTerm(fun)
             val methodSignatureOpt =
               resolveScalaMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
@@ -51,12 +47,10 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
               case Some(methodSig)
                   if methodSig.parameterLists.nonEmpty => // parameterLists.nonEmpty filters out FunctionX types
                 val patchGen: (Term, Int) => Patch =
-                  mkPatchGenForArgList(methodSig, determineParamBlockIndex(fname))
+                  mkPatchGenForArgList(config, methodSig, determineParamBlockIndex(fname))
                 args.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
               case _ => List.empty
             }
-          } else
-            List.empty
         }
       }
       .flatten
@@ -65,9 +59,6 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
 
   private def hasPlaceholder(argTerms: List[Term]): Boolean =
     argTerms.collect{ case Term.Placeholder() => true }.exists(x => x)
-
-  private def shouldPatchArgumentBlock(argTerms: List[Term]): Boolean =
-    argTerms.lengthCompare(config.minParams) != -1
 
   private def resolveFunctionTerm(term: Term): Term =
     term match {
@@ -81,24 +72,31 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
     }
 
   private def mkPatchGenForArgList(
+    config: UseNamedParametersConfig,
     methodSig: MethodSignature,
     paramBlockIdx: Int
   )(implicit doc: SemanticDocument): (Term, Int) => Patch = {
     val thisParamBlock = methodSig.parameterLists(paramBlockIdx)
-    (term: Term, idx: Int) => {
-      term match {
-        case _: Term.Assign => Patch.empty // Already using named param, no patch needed
-        case t =>
-          // Term.Name will escape any weird identifiers
-          thisParamBlock.lift(idx) match {
-            case Some(symInfo) =>
-              val paramName = Term.Name(symInfo.displayName).toString
-              Patch.addLeft(t, s"$paramName = ")
-            case None => // Var args
-              Patch.empty
+        // Whether to apply named param patching is dependent on parameters
+        // in the method definition, not use site.
+        if (thisParamBlock.length < config.minParams) {
+          (_, _) => Patch.empty
+        }else {
+          (term: Term, idx: Int) => {
+            term match {
+              case _: Term.Assign => Patch.empty // Already using named param, no patch needed
+              case t =>
+                // Term.Name will escape any weird identifiers
+                thisParamBlock.lift(idx) match {
+                  case Some(symInfo) =>
+                    val paramName = Term.Name(symInfo.displayName).toString
+                    Patch.addLeft(t, s"$paramName = ")
+                  case None => // Var args
+                    Patch.empty
+                }
+            }
           }
-      }
-    }
+        }
   }
 
   private def resolveScalaMethodSignatureFromSymbol(

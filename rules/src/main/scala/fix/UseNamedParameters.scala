@@ -39,19 +39,21 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 }
             case None => List.empty
           }
-        case Term.Apply(fun, args) if !hasPlaceholder(args) => {
-            val fname = resolveFunctionTerm(fun)
-            val methodSignatureOpt =
-              resolveScalaMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
-            methodSignatureOpt match {
-              case Some(methodSig)
-                  if methodSig.parameterLists.nonEmpty => // parameterLists.nonEmpty filters out FunctionX types
-                val patchGen: (Term, Int) => Patch =
-                  mkPatchGenForArgList(config, methodSig, determineParamBlockIndex(fname))
-                args.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
-              case _ => List.empty
-            }
-        }
+        case Term.Apply(fun, args) if !hasPlaceholder(args) =>
+          resolveFunctionTerm(fun) match {
+            case Some(fname) =>
+              val methodSignatureOpt =
+                resolveScalaMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
+              methodSignatureOpt match {
+                case Some(methodSig)
+                    if methodSig.parameterLists.nonEmpty => // parameterLists.nonEmpty filters out FunctionX types
+                  val patchGen: (Term, Int) => Patch =
+                    mkPatchGenForArgList(config, methodSig, determineParamBlockIndex(fname))
+                  args.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
+                case _ => List.empty
+              }
+            case _ => List.empty
+          }
       }
       .flatten
       .asPatch
@@ -60,15 +62,16 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   private def hasPlaceholder(argTerms: List[Term]): Boolean =
     argTerms.collect{ case Term.Placeholder() => true }.exists(x => x)
 
-  private def resolveFunctionTerm(term: Term): Term =
+  private def resolveFunctionTerm(term: Term): Option[Term] =
     term match {
-      case fname: Term.Name => fname
+      case fname: Term.Name => Some(fname)
       case fname: Term.Apply =>
         // For curried functions, return the Term as is as we need
         // it to figure out which param block we're currently handling
-        fname
-      case Term.ApplyType(fname, _) => fname
-      case s: Term.Select => s.name
+        Some(fname)
+      case Term.ApplyType(fname, _) => Some(fname)
+      case s: Term.Select => Some(s.name)
+      case _ => None
     }
 
   private def mkPatchGenForArgList(

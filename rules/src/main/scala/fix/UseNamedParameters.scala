@@ -79,27 +79,32 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
     methodSig: MethodSignature,
     paramBlockIdx: Int
   )(implicit doc: SemanticDocument): (Term, Int) => Patch = {
-    val thisParamBlock = methodSig.parameterLists(paramBlockIdx)
-        // Whether to apply named param patching is dependent on parameters
-        // in the method definition, not use site.
-        if (thisParamBlock.length < config.minParams) {
-          (_, _) => Patch.empty
-        }else {
-          (term: Term, idx: Int) => {
-            term match {
-              case _: Term.Assign => Patch.empty // Already using named param, no patch needed
-              case t =>
-                // Term.Name will escape any weird identifiers
-                thisParamBlock.lift(idx) match {
-                  case Some(symInfo) =>
-                    val paramName = Term.Name(symInfo.displayName).toString
-                    Patch.addLeft(t, s"$paramName = ")
-                  case None => // Var args
-                    Patch.empty
-                }
-            }
+    // If the result of applying the method is a function, it will be IndexOutOfBounds
+    if (methodSig.parameterLists.size > paramBlockIdx) {
+      val thisParamBlock = methodSig.parameterLists(paramBlockIdx)
+      // Whether to apply named param patching is dependent on parameters
+      // in the method definition, not use site.
+      if (thisParamBlock.length < config.minParams) { (_, _) =>
+        Patch.empty
+      } else { (term: Term, idx: Int) =>
+        {
+          term match {
+            case _: Term.Assign => Patch.empty // Already using named param, no patch needed
+            case t =>
+              // Term.Name will escape any weird identifiers
+              thisParamBlock.lift(idx) match {
+                case Some(symInfo) =>
+                  val paramName = Term.Name(symInfo.displayName).toString
+                  Patch.addLeft(t, s"$paramName = ")
+                case None => // Var args
+                  Patch.empty
+              }
           }
         }
+      }
+    } else { (_, _) =>
+      Patch.empty
+    }
   }
 
   private def resolveScalaMethodSignatureFromSymbol(

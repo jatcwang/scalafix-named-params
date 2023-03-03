@@ -31,11 +31,13 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
           resolveScalaMethodSignatureFromSymbol(name.symbol) match {
             case Some(methodSig) =>
               val patchGens: List[(Term, Int) => Patch] =
-                methodSig.parameterLists.zipWithIndex.map { case (_, idx) => mkPatchGenForArgList(config, methodSig, idx) }
+                methodSig.parameterLists.zipWithIndex.map { case (_, idx) =>
+                  mkPatchGenForArgList(config, methodSig, idx)
+                }
               argss
                 .zip(patchGens)
                 .flatMap { case (argsInBlock, patchGen) =>
-                    argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
+                  argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
                 }
             case None => List.empty
           }
@@ -60,7 +62,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   }
 
   private def hasPlaceholder(argTerms: List[Term]): Boolean =
-    argTerms.collect{ case Term.Placeholder() => true }.exists(x => x)
+    argTerms.collect { case Term.Placeholder() => true }.exists(x => x)
 
   private def resolveFunctionTerm(term: Term): Option[Term] =
     term match {
@@ -90,13 +92,17 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
         {
           term match {
             case _: Term.Assign => Patch.empty // Already using named param, no patch needed
+            case _: Term.Block => Patch.empty // map { _ => _ }
+            case _: Term.PartialFunction => Patch.empty // map { case _ => _ }
             case t =>
               // Term.Name will escape any weird identifiers
               thisParamBlock.lift(idx) match {
-                case Some(symInfo) =>
+                case Some(symInfo)
+                    // In the case of repeated parameters, if the parameter name is given only at the beginning, it is broken.
+                    if !symInfo.signature.toString().startsWith("* Tuple") =>
                   val paramName = Term.Name(symInfo.displayName).toString
                   Patch.addLeft(t, s"$paramName = ")
-                case None => // Var args
+                case _ => // Var args
                   Patch.empty
               }
           }

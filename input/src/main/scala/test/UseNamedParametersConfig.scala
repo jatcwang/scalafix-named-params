@@ -1,6 +1,6 @@
 /*
 rule = UseNamedParameters
-UseNamedParameters.minParams = 2
+UseNamedParameters.minParams = 1
  */
 package test
 
@@ -49,6 +49,7 @@ object UseNamedParametersConfig {
   VarArgs(a = "a", i = 1, 2, 3).varArgs("b", 4, 5, 6)
 
   new JavaClass(1, "s").method(2, "ss")
-  
-  List(1,2,3)
+
+  List(1, 2, 3).map { _.toLong }.map { case _ => 1 }
+  Map.apply("a" -> 1, "b" -> 2)
 }

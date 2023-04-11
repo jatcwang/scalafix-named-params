@@ -10,6 +10,8 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
     extends SemanticRule(classOf[UseNamedParameters].getSimpleName) {
   def this() = this(UseNamedParametersConfig.default)
 
+  private val pattern = "[A-Za-z]\\d*".r
+
   override def withConfiguration(config: Configuration): Configured[Rule] = {
     val requiredScalacOption = "-P:semanticdb:synthetics:on"
     if (config.scalacOptions.contains(requiredScalacOption)) {
@@ -100,7 +102,6 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 case Some(symInfo)
                     // In the case of repeated parameters, if the parameter name is given only at the beginning, it is broken.
                     if !symInfo.signature.toString().startsWith("* Tuple") =>
-                  val pattern =  "[A-Za-z]\\d*".r
                   Term.Name(symInfo.displayName).toString match {
                     case pattern() if config.skipSingleAlphabet => Patch.empty
                     case paramName => Patch.addLeft(t, s"$paramName = ")

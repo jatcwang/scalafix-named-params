@@ -50,3 +50,9 @@ You can configure this in `.scalafix.conf`
 ```
 UseNamedParameters.minParams = 2
 ```
+
+You can skip parameters with a single letter, such as `x`, `y`, or names that are only followed by a number, such as `a1`, `a2`, and so on.
+
+```
+UseNamedParameters.skipSingleAlphabet = true
+```

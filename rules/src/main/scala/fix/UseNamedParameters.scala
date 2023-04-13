@@ -102,9 +102,11 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 case Some(symInfo)
                     // In the case of repeated parameters, if the parameter name is given only at the beginning, it is broken.
                     if !symInfo.signature.toString().startsWith("* Tuple") =>
-                  Term.Name(symInfo.displayName).toString match {
-                    case pattern() if config.skipSingleAlphabet => Patch.empty
-                    case paramName => Patch.addLeft(t, s"$paramName = ")
+                  val paramName = Term.Name(symInfo.displayName).toString
+                  if (config.skipSingleAlphabet && paramName.matches(pattern.pattern.pattern())) {
+                    Patch.empty
+                  } else {
+                    Patch.addLeft(t, s"$paramName = ")
                   }
                 case _ => // Var args
                   Patch.empty

@@ -9,11 +9,13 @@ final case class UseNamedParametersConfig(
     "Only perform the rewrite for method calls " +
       "with number of parameters equal or greater than this value"
   )
-  minParams: Int
+  minParams: Int,
+  @Description("Skip variable names with a single letter or followed by a sequence of numbers")
+  skipSingleAlphabet: Boolean
 )
 
 object UseNamedParametersConfig {
-  val default: UseNamedParametersConfig = UseNamedParametersConfig(minParams = 3)
+  val default: UseNamedParametersConfig = UseNamedParametersConfig(minParams = 3, skipSingleAlphabet = false)
 
   implicit val surface: Surface[UseNamedParametersConfig] =
     metaconfig.generic.deriveSurface[UseNamedParametersConfig]

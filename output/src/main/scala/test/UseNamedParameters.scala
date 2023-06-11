@@ -13,4 +13,17 @@ object UseNamedParameters {
   new Three(i = 1, j = 2, k = 3)
   new Four(i = 1, j = 2, k = 3, l = 4)
   val makeFour: (Int, Int) => Four = new Four(1, _, _, 4)
+
+  object Suppresions {
+    // scalafix:off
+    Two(1, 2)
+    Three(1, 2, 3)
+    Four(1, 2, 3, 4)
+
+    new Two(1, 2)
+    new Three(1, 2, 3)
+    new Four(1, 2, 3, 4)
+    val makeFour: (Int, Int) => Four = new Four(1, _, _, 4)
+    // scalafix:on
+  }
 }

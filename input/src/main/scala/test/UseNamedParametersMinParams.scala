@@ -52,4 +52,34 @@ object UseNamedParametersConfig {
 
   List(1, 2, 3).map { _.toLong }.map { case _ => 1 }
   Map.apply("a" -> 1, "b" -> 2)
+
+  object Suppressions {
+    // scalafix:off
+    Case(1, "s")
+    new Case(2, "s")
+    Case.apply(3, "z")
+    new Curry(1, "s")(5, 6.0, 7L)
+    
+    func(3, "s")
+    `cur)ried`(1, "s")(7, 8.0, 9L)
+    val partialApply = `cur)ried`(1, "s") _
+    partialApply(7, 8.0, 9L)
+    
+    overloaded(1, 2, 3)
+    overloaded(1, 2, "3")
+    
+    new Overload(1, 2L)
+    new Overload(1, 2).method(1, 2)
+    
+    TParam[Int](1, 2)
+    new TParam[Int](3, 4)
+    
+    TCurry[Long](1L, 2L)(3L, 4L)
+    new TCurry[Long](1L, 2L)(3L, 4L)
+    
+    VarArgs(a = "a", i = 1, 2, 3).varArgs("b", 4, 5, 6)
+    
+    List(1, 2, 3).map { _.toLong }.map { case _ => 1 }
+    // scalafix:on
+  }
 }

@@ -40,4 +40,11 @@ object UseNamedParametersSkipSingleAlphabet {
   new JavaClass(1, "s").method(2, "ss")
 
   Map.apply("a" -> 1, "b" -> 2)
+
+  object Suppressions {
+    // scalafix:off
+    new Overload(1, 2L)
+    new Overload(1, 2).method(1, 2)
+    // scalafix:on
+  }
 }

@@ -40,26 +40,25 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 .zip(patchGens)
                 .flatMap { case (argsInBlock, patchGen) =>
                   argsInBlock.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
-                }
-            case None => List.empty
+                }.asPatch.atomic
+            case None => Patch.empty
           }
         case Term.Apply(fun, args) if !hasPlaceholder(args) =>
           resolveFunctionTerm(fun) match {
             case Some(fname) =>
               val methodSignatureOpt =
                 resolveScalaMethodSignatureFromSymbol(fname.symbol).orElse(resolveFromSynthetics(fname))
-              methodSignatureOpt match {
+              (methodSignatureOpt match {
                 case Some(methodSig)
                     if methodSig.parameterLists.nonEmpty => // parameterLists.nonEmpty filters out FunctionX types
                   val patchGen: (Term, Int) => Patch =
                     mkPatchGenForArgList(config, methodSig, determineParamBlockIndex(fname))
                   args.zipWithIndex.map { case (t, idx) => patchGen(t, idx) }
                 case _ => List.empty
-              }
-            case _ => List.empty
+              }).asPatch.atomic
+            case _ => Patch.empty
           }
       }
-      .flatten
       .asPatch
   }
 

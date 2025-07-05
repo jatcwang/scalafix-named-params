@@ -29,7 +29,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   override def fix(implicit doc: SemanticDocument): Patch = {
     doc.tree
       .collect {
-        case Init(_, name, argss) if !hasPlaceholder(argss.flatten) =>
+        case Init.After_4_6_0(_, name, argss) if !hasPlaceholder(argss.flatMap(_.values).toList) =>
           resolveScalaMethodSignatureFromSymbol(name.symbol) match {
             case Some(methodSig) =>
               val patchGens: List[(Term, Int) => Patch] =
@@ -43,7 +43,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
                 }.asPatch.atomic
             case None => Patch.empty
           }
-        case Term.Apply(fun, args) if !hasPlaceholder(args) =>
+        case Term.Apply.After_4_6_0(fun, args) if !hasPlaceholder(args) =>
           resolveFunctionTerm(fun) match {
             case Some(fname) =>
               val methodSignatureOpt =
@@ -72,7 +72,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
         // For curried functions, return the Term as is as we need
         // it to figure out which param block we're currently handling
         Some(fname)
-      case Term.ApplyType(fname, _) => Some(fname)
+      case Term.ApplyType.After_4_6_0(fname, _) => Some(fname)
       case s: Term.Select => Some(s.name)
       case _ => None
     }
@@ -144,7 +144,7 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   @tailrec
   private def determineParamBlockIndex(curFuncTerm: Term, curIndex: Int = 0): Int =
     curFuncTerm match {
-      case Term.Apply(innerFuncTerm, _) => determineParamBlockIndex(innerFuncTerm, curIndex + 1)
+      case Term.Apply.After_4_6_0(innerFuncTerm, _) => determineParamBlockIndex(innerFuncTerm, curIndex + 1)
       case _ => curIndex
     }
 }

@@ -13,15 +13,15 @@ final class UseNamedParameters(config: UseNamedParametersConfig)
   private val singleAlphabetPattern = "^[A-Za-z]\\d*$".r
 
   override def withConfiguration(config: Configuration): Configured[Rule] = {
-    val requiredScalacOption = "-P:semanticdb:synthetics:on"
-    if (config.scalacOptions.contains(requiredScalacOption)) {
+    val requiredScalacOptions = Seq("-P:semanticdb:synthetics:on", "-Xsemanticdb")
+    if (requiredScalacOptions.exists(config.scalacOptions.contains)) {
       config.conf
         .getOrElse(this.getClass.getSimpleName)(this.config)
         .map(newConfig => new UseNamedParameters(newConfig))
     } else {
       Configured.error(
         s"""This rule requires SemanticDB synthetics to work properly (e.g. to detect case class apply).
-          |Please add "$requiredScalacOption" to scala compiler options (e.g. scalacOptions in SBT).""".stripMargin
+          |Please add ${requiredScalacOptions.map("\"" + _ + "\"").mkString(" or ")} to scala compiler options (e.g. scalacOptions in SBT).""".stripMargin
       )
     }
   }

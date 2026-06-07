@@ -2,7 +2,7 @@ import sbtghactions.JavaSpec
 
 lazy val V = _root_.scalafix.sbt.BuildInfo
 
-val scala3 = "3.7.4"
+val scala3 = "3.8.4"
 
 inThisBuild(
   List(
@@ -17,8 +17,8 @@ inThisBuild(
         url("https://almostfunctional.com")
       )
     ),
-    scalaVersion := V.scala212,
-    crossScalaVersions := Seq(V.scala212, V.scala213),
+    scalaVersion := V.scala213,
+    crossScalaVersions := Seq(V.scala213),
   )
 )
 
@@ -84,11 +84,24 @@ lazy val tests = project
   .dependsOn(rules)
   .enablePlugins(ScalafixTestkitPlugin)
 
-ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("11"))
+lazy val setupMise = Seq(
+  WorkflowStep.Use(
+    UseRef.Public("jdx", "mise-action", "v4"),
+    name = Some("Setup mise"),
+  ),
+)
+
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
 ThisBuild / githubWorkflowScalaVersions += scala3
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches :=
   Seq(RefPredicate.StartsWith(Ref.Tag("v")))
+
+ThisBuild / githubWorkflowJobSetup :=
+  Seq(WorkflowStep.CheckoutFull) ++
+    setupMise ++
+    Seq(WorkflowStep.SetupSbt()) ++
+    githubWorkflowGeneratedCacheSteps.value
 
 ThisBuild / githubWorkflowPublish := Seq(
   WorkflowStep.Sbt(

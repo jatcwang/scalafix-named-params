@@ -92,8 +92,8 @@ lazy val setupMise = Seq(
 )
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
-ThisBuild / githubWorkflowScalaVersions += scala3
-ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+ThisBuild / githubWorkflowScalaVersions := Seq(V.scala213, scala3)
+ThisBuild / githubWorkflowTargetTags := Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches :=
   Seq(RefPredicate.StartsWith(Ref.Tag("v")))
 

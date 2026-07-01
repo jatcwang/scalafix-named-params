@@ -45,7 +45,7 @@ jobs:
         run: sbt '++ ${{ matrix.scala }}; test'
 
       - name: Compress target directories
-        run: tar cf targets.tar tests/target target rules/target output/target input/target project/target
+        run: tar cf targets.tar target/out/jvm/scala-2.13.18/tests target/out/jvm/scala-2.13.18/scalafix-named-params-root target/out/jvm/scala-2.13.18/scalafix-named-params target/out/jvm/scala-2.13.18/output target/out/jvm/scala-2.13.18/input project/target
 
       - name: Upload target directories
         uses: actions/upload-artifact@v7

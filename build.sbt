@@ -2,7 +2,7 @@ import sbtghactions.JavaSpec
 
 lazy val V = _root_.scalafix.sbt.BuildInfo
 
-val scala3 = "3.8.4"
+val scala3 = "3.9.0"
 
 inThisBuild(
   List(
